@@ -28,3 +28,7 @@ The project is designed for managed Cloud Run-style deployment. Do not commit `.
 ## Devpost handoff
 
 Paste the final public repository URL into the Devpost submission, attach the public demo video, upload `ARCHITECTURE.png`, and use the copy in `SUBMISSION_COPY.md`. Confirm that the video shows the live trace, evidence citations, approval gate, persisted draft, and architecture page. Google Cloud deployment proof is optional and should not be described as part of the no-cost path. Do not claim that a message was sent or a form was submitted unless the action was actually approved and executed in the connected environment.
+
+## Failure and safety behavior
+
+If extraction returns malformed JSON, CivicShield keeps a safe empty fallback rather than inventing facts, records the extraction trace, and leaves the case available for retry. If evidence storage fails, the upload mutation returns an error and does not attach an incomplete case artifact. Generated outbound actions are isolated behind an approval record; rejection marks the action blocked and preserves the decision in the audit trace. Action dependencies are stored explicitly, so the planner can resume from the last durable node instead of repeating every step.

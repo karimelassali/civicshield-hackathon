@@ -1,8 +1,14 @@
 # CivicShield — Devpost Submission Draft
 
+> **Rehearsal-only notice:** This package documents a polished free-path prototype. It is not yet compliant for final hackathon submission because the required Gemini 3.5+, Google Agent Framework, Google Cloud service, and Google Cloud proof have not been connected.
+
 ## One-line summary
 
 CivicShield is a safety-first bureaucratic case agent that turns contradictory notices into deadline-aware action plans, evidence-grounded drafts, and approval-controlled execution.
+
+## Category: Taskmaster
+
+CivicShield is designed for the **Taskmaster** category because it completes a messy multi-step workflow: it ingests evidence, resolves deadline conflicts, creates dependent actions, drafts artifacts, and pauses only at a consequential outbound step. It is not a legal chatbot and it does not issue legal conclusions.
 
 ## The problem
 
@@ -25,6 +31,14 @@ The prototype uses the built-in server-side LLM integration, S3-compatible evide
 ## Demo scenario
 
 The synthetic Northstar Housing Services case contains a leaking boiler, unsafe hallway lighting, three conflicting deadline interpretations, and a missing contractor access calendar. In a single live run, CivicShield stores the notice, extracts obligations, flags the conflict, selects September 12 as the earliest safe appeal date, builds the action graph, drafts the response, and pauses the outbound request in the approval queue.
+
+## Judge lens for the rehearsal
+
+This prototype is intentionally structured to demonstrate how it could score once the mandatory Google stack is connected and proven. It is not a claim of current eligibility.
+
+## Why this should score
+
+CivicShield targets the 40% Innovation & Operational Utility criterion with a concrete BYOF-style friction: contradictory administrative deadlines and missing paperwork. It targets the 30% Architectural Discipline criterion with durable case state, explicit action dependencies, evidence citations, scoped approval gates, and resumable trace events. It targets the 30% Demo & Production Readiness criterion with a four-minute proof sequence that shows the case changing from messy notice to safe action plan.
 
 ## Responsible boundaries
 

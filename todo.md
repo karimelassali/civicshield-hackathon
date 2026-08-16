@@ -26,3 +26,14 @@
 - [x] Switch final submission scope to the built-in LLM path with no Google Cloud billing or private credentials
 - [x] Update architecture and Devpost copy to label Gemini 3.5 / Vertex AI / Cloud Run / Firestore / Pub/Sub as optional production adapters
 - [x] Remove the blocked credential and cloud-proof requirements from the no-cost demo handoff
+
+- [x] Select Taskmaster category and update all submission copy to frame CivicShield as a complete workflow, not a legal chatbot
+- [x] Defer mandatory Gemini 3.5+ model, Google Agent Framework, and Google Cloud service verification because the user selected rehearsal-only option B
+- [x] Add an unedited proof-of-action recording plan showing backend execution, persisted state changes, and the required Google Cloud proof gate
+- [x] Add measurable demo counters for conflicting dates resolved, obligations tracked, and high-stakes actions held
+- [x] Add explicit failure/retry and scoped-tool documentation for architectural discipline
+- [x] Defer public build-log and social-post publication; they remain optional user-owned actions outside the rehearsal build
+
+- [x] Lock the final free-path rehearsal language across README, UI, demo script, Devpost copy, and repository handoff without implying hackathon compliance
+- [x] Add a rehearsal-mode proof banner or disclosure so judges are not misled about the missing Google-stack integration
+- [x] Add a compact judge handoff card with the demo sequence, measurable outcomes, and safe-action boundary
