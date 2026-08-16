@@ -1,33 +1,95 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "wouter";
+import { toast } from "sonner";
+import { ArrowUpRight, Check, Clock3, FileCheck2, FileText, GitBranch, LockKeyhole, Network, Play, RefreshCw, Send, ShieldAlert, Sparkles, Upload, Waypoints, X } from "lucide-react";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
-export default function Home() {
-  // The useAuth hook provides authentication state.
-  // To implement login/logout, call logout(), or start login from an event
-  // handler: onClick={() => startLogin()} (imported from "@/const"). Never call
-  // startLogin() during render (no href={startLogin()}) — it mints a one-time
-  // nonce cookie and must run only at the moment of navigation.
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+const navMeta: Record<string, { eyebrow: string; title: string; description: string }> = {
+  "/": { eyebrow: "CIVICSHIELD / COMMAND CENTER", title: "Make the deadline visible. Make the next action safe.", description: "A bureaucratic case agent that turns messy notices into evidence-grounded work — and knows when to stop for human approval." },
+  "/evidence": { eyebrow: "EVIDENCE INTAKE", title: "Every decision starts with a source.", description: "Upload notices, images, and correspondence. CivicShield keeps the original artifact, retrieval link, and citation context attached to the case." },
+  "/approvals": { eyebrow: "HUMAN SAFETY GATES", title: "Autonomy with a brake pedal.", description: "High-stakes actions wait here. Nothing leaves the case without an explicit human decision." },
+  "/architecture": { eyebrow: "SYSTEM DESIGN", title: "A workflow, not a chat loop.", description: "State, events, specialized agents, evidence, and approvals are visible in one operating model." },
+  "/build-log": { eyebrow: "BUILD LOG", title: "Built for the judge’s first four minutes.", description: "A compact explanation of the problem, the twist, the architecture, and the proof of action." },
+};
 
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
-    </div>
-  );
+function formatDue(date: Date | string | null | undefined) {
+  if (!date) return "No deadline";
+  const target = new Date(date).getTime();
+  const days = Math.ceil((target - Date.now()) / 86400000);
+  if (days <= 0) return "Due today";
+  return `${days} days left`;
 }
+
+function StatusPill({ status }: { status: string }) {
+  const style = status.includes("approval") || status === "warning" || status === "conflicted" ? "border-amber-200 bg-amber-50 text-amber-800" : status === "completed" || status === "complete" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-slate-200 bg-slate-50 text-slate-700";
+  return <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${style}`}>{status.replaceAll("_", " ")}</span>;
+}
+
+function ArchitecturePage() {
+  const nodes = [
+    ["Document intake", "PDF · image · text", "border-blue-200 bg-blue-50 text-blue-900"],
+    ["Gemini 3.5", "extract · plan · draft", "border-violet-200 bg-violet-50 text-violet-900"],
+    ["ADK / Genkit", "orchestrate tools", "border-orange-200 bg-orange-50 text-orange-900"],
+    ["Cloud Run", "secure execution", "border-emerald-200 bg-emerald-50 text-emerald-900"],
+    ["Firestore", "case memory", "border-cyan-200 bg-cyan-50 text-cyan-900"],
+    ["Pub/Sub", "async events", "border-pink-200 bg-pink-50 text-pink-900"],
+  ];
+  return <div className="space-y-6"><div className="grid gap-4 md:grid-cols-3">{nodes.map(([name, detail, style]) => <div key={name} className={`rounded-2xl border p-5 ${style}`}><div className="mb-5 flex items-center justify-between"><Network className="h-5 w-5" /><span className="text-[10px] font-black uppercase tracking-[0.2em]">CivicShield</span></div><p className="text-lg font-semibold">{name}</p><p className="mt-1 text-sm opacity-70">{detail}</p></div>)}</div><Card className="overflow-hidden border-0 bg-slate-950 text-white shadow-xl"><CardContent className="p-6"><div className="flex flex-wrap items-center justify-center gap-3 text-center text-sm"><span className="rounded-xl border border-white/20 px-4 py-3">Evidence</span><ArrowUpRight className="h-4 w-4 text-violet-300" /><span className="rounded-xl border border-violet-400/60 bg-violet-400/10 px-4 py-3">Gemini 3.5 + ADK / Genkit</span><ArrowUpRight className="h-4 w-4 text-emerald-300" /><span className="rounded-xl border border-emerald-400/60 bg-emerald-400/10 px-4 py-3">Cloud Run</span><ArrowUpRight className="h-4 w-4 text-cyan-300" /><span className="rounded-xl border border-cyan-400/60 bg-cyan-400/10 px-4 py-3">Firestore memory</span><ArrowUpRight className="h-4 w-4 text-pink-300" /><span className="rounded-xl border border-pink-400/60 bg-pink-400/10 px-4 py-3">Pub/Sub events</span></div><div className="mt-6 grid gap-3 border-t border-white/10 pt-5 text-xs text-slate-300 md:grid-cols-3"><p><b className="text-white">Safety:</b> scoped tools, evidence citations, human approval gates.</p><p><b className="text-white">Resilience:</b> durable case state, resumable action graph, idempotent steps.</p><p><b className="text-white">Proof:</b> live trace, audit history, reproducible architecture.</p></div></CardContent></Card></div>;
+}
+
+function BuildLogPage() {
+  return <div className="max-w-3xl space-y-8"><article className="rounded-3xl bg-slate-950 p-7 text-white shadow-xl"><p className="text-xs font-black uppercase tracking-[0.22em] text-cyan-300">The twist</p><h2 className="mt-3 text-3xl font-semibold tracking-tight">Deadline rescue under uncertainty.</h2><p className="mt-4 text-slate-300">CivicShield does not just summarize a notice. It compares contradictory dates, chooses the earliest safe interpretation, builds a dependency graph, prepares the next artifacts, and pauses only where a consequential action needs a human.</p></article><div className="grid gap-4 md:grid-cols-3">{[["01", "Ingest", "Preserve the original evidence and retrieve it by citation."], ["02", "Act", "Route the case through extraction, conflict detection, and planning."], ["03", "Prove", "Show the live trace, approval gate, and completed action." ]].map(([n, t, d]) => <Card key={n} className="border-slate-200"><CardContent className="p-5"><span className="text-xs font-black text-slate-400">{n}</span><h3 className="mt-6 font-semibold">{t}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{d}</p></CardContent></Card>)}</div><div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6"><p className="text-sm font-semibold">Build note</p><p className="mt-2 text-sm leading-6 text-slate-600">This page is intentionally written as a public build-log seed. Add the final demo recording and repository link before submission to claim the optional content contribution.</p><Button className="mt-5 bg-slate-900" onClick={() => { const text = "CivicShield turns messy bureaucratic notices into safe, autonomous workflows. Built for the All Things Agentic Hackathon #AllThingsAgenticHackathon"; navigator.clipboard?.writeText(text); window.open(`https://x.com/intent/post?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer"); toast.success("Prefilled share opened"); }}>Draft social share</Button></div></div>;
+}
+
+export default function Home() {
+  const [location] = useLocation();
+  const meta = navMeta[location] ?? navMeta["/"];
+  const dashboard = trpc.civic.dashboard.useQuery(undefined, { refetchInterval: 5000 });
+  const [selectedCaseId, setSelectedCaseId] = useState<number | undefined>();
+  const seedDemo = trpc.civic.seedDemo.useMutation({ onSuccess: () => { toast.success("Demo case created with evidence and trace"); dashboard.refetch(); }, onError: error => toast.error(error.message) });
+  const analyze = trpc.civic.analyze.useMutation({ onSuccess: () => { toast.success("Gemini analysis completed"); dashboard.refetch(); }, onError: error => toast.error(error.message) });
+  const resolveApproval = trpc.civic.resolveApproval.useMutation({ onSuccess: () => { toast.success("Safety gate updated"); dashboard.refetch(); }, onError: error => toast.error(error.message) });
+  const caseId = selectedCaseId ?? dashboard.data?.cases?.[0]?.id;
+  const bundle = trpc.civic.caseBundle.useQuery({ caseId: caseId ?? 0 }, { enabled: Boolean(caseId), refetchInterval: 3000 });
+  const currentCase = bundle.data?.case ?? dashboard.data?.cases?.find(item => item.id === caseId);
+  const trace = bundle.data?.trace ?? [];
+  const pending = dashboard.data?.pendingApprovals ?? [];
+  useEffect(() => { if (!selectedCaseId && dashboard.data?.cases?.[0]?.id) setSelectedCaseId(dashboard.data.cases[0].id); }, [dashboard.data, selectedCaseId]);
+  const daysLabel = useMemo(() => formatDue(currentCase?.nextDeadline), [currentCase?.nextDeadline]);
+
+  const shell = <>
+    <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end"><div><p className="text-[11px] font-black tracking-[0.2em] text-blue-600">{meta.eyebrow}</p><h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-slate-950 md:text-5xl">{meta.title}</h1><p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">{meta.description}</p></div><div className="flex gap-2"><Button variant="outline" className="border-slate-300" onClick={() => dashboard.refetch()}><RefreshCw className="mr-2 h-4 w-4" />Refresh</Button><Button className="bg-slate-950 hover:bg-slate-800" onClick={() => seedDemo.mutate()} disabled={seedDemo.isPending}><Sparkles className="mr-2 h-4 w-4" />{seedDemo.isPending ? "Preparing…" : "Load demo case"}</Button></div></div>
+    {location === "/architecture" ? <ArchitecturePage /> : location === "/build-log" ? <BuildLogPage /> : location === "/approvals" ? <ApprovalsPage pending={pending} onResolve={(id: number, decision: "approved" | "rejected") => resolveApproval.mutate({ approvalId: id, decision })} /> : location === "/evidence" ? <EvidencePage bundle={bundle.data} /> : <CommandCenter currentCase={currentCase} bundle={bundle.data} trace={trace} daysLabel={daysLabel} onSelect={setSelectedCaseId} cases={dashboard.data?.cases ?? []} onAnalyze={() => caseId && analyze.mutate({ caseId })} analyzing={analyze.isPending} pending={pending} onResolve={(id: number, decision: "approved" | "rejected") => resolveApproval.mutate({ approvalId: id, decision })} onSeed={() => seedDemo.mutate()} />}
+  </>;
+  return <main className="min-h-screen bg-[#f6f8fb] px-5 py-8 text-slate-900 md:px-8 lg:px-10"><div className="mx-auto max-w-[1440px]">{shell}</div></main>;
+}
+
+function CommandCenter({ currentCase, bundle, trace, daysLabel, onSelect, cases, onAnalyze, analyzing, pending, onResolve, onSeed }: any) {
+  if (!currentCase) return <EmptyState onSeed={onSeed} />;
+  return <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]"><div className="space-y-6"><Card className="overflow-hidden border-0 bg-white shadow-sm"><CardContent className="p-0"><div className="border-b border-slate-100 p-6 md:p-8"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex items-center gap-2"><StatusPill status={currentCase.status} /><span className="text-xs font-medium text-slate-400">Case #{currentCase.id.toString().padStart(4, "0")}</span></div><h2 className="mt-4 text-2xl font-semibold tracking-tight">{currentCase.title}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{currentCase.summary}</p></div><div className="rounded-2xl bg-amber-50 px-4 py-3 text-right"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Next deadline</p><p className="mt-1 text-xl font-semibold text-amber-950">{daysLabel}</p><p className="text-xs text-amber-800">September 12 · safe date</p></div></div><div className="mt-7 flex items-center justify-between text-xs font-semibold text-slate-500"><span>Resolution readiness</span><span>{currentCase.progress}%</span></div><Progress value={currentCase.progress} className="mt-2 h-2 bg-slate-100" /></div><div className="grid gap-3 p-6 md:grid-cols-3 md:p-8"><Metric icon={<FileText />} label="Evidence" value={bundle?.evidence?.length ?? 0} note="source artifacts" /><Metric icon={<Clock3 />} label="Deadlines" value={bundle?.deadlines?.length ?? 0} note="one conflicted" /><Metric icon={<ShieldAlert />} label="Approvals" value={pending.length} note="human decision" /></div></CardContent></Card><div className="grid gap-6 lg:grid-cols-[1fr_1fr]"><Card className="border-0 bg-white shadow-sm"><CardHeader className="flex-row items-center justify-between"><CardTitle className="text-base">Action graph</CardTitle><Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={onAnalyze} disabled={analyzing}><Play className="mr-2 h-3.5 w-3.5" />{analyzing ? "Running…" : "Run agent"}</Button></CardHeader><CardContent className="space-y-3">{(bundle?.actions ?? []).map((action: any, index: number) => <div key={action.id} className="flex gap-3 rounded-xl border border-slate-100 p-3"><div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${action.status === "completed" ? "bg-emerald-100 text-emerald-700" : action.status === "pending_approval" ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"}`}>{action.status === "completed" ? <Check className="h-3.5 w-3.5" /> : index + 1}</div><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold">{action.title}</p><StatusPill status={action.status} /></div><p className="mt-1 text-xs leading-5 text-slate-500">{action.description}</p><p className="mt-2 text-[10px] font-semibold text-blue-600">↳ {action.sourceCitation}</p></div></div>)}</CardContent></Card><TracePanel trace={trace} /></div></div><div className="space-y-6"><Card className="border-0 bg-slate-950 text-white shadow-xl"><CardContent className="p-6"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">Live case memory</p><h3 className="mt-2 text-xl font-semibold">The agent remembers context.</h3></div><LockKeyhole className="h-5 w-5 text-cyan-300" /></div><p className="mt-4 text-sm leading-6 text-slate-300">Every deadline, citation, action, and human decision is persisted so the workflow can resume without starting from zero.</p><div className="mt-6 grid grid-cols-2 gap-3"><div className="rounded-xl border border-white/10 bg-white/5 p-3"><p className="text-2xl font-semibold">{bundle?.actions?.filter((a: any) => a.status === "completed").length ?? 0}</p><p className="mt-1 text-xs text-slate-400">actions complete</p></div><div className="rounded-xl border border-white/10 bg-white/5 p-3"><p className="text-2xl font-semibold">{trace.length}</p><p className="mt-1 text-xs text-slate-400">audit events</p></div></div></CardContent></Card><Card className="border-0 bg-white shadow-sm"><CardHeader><div className="flex items-center justify-between"><CardTitle className="text-base">Your cases</CardTitle><Badge variant="secondary">{cases.length} active</Badge></div></CardHeader><CardContent className="space-y-2">{cases.map((item: any) => <button key={item.id} onClick={() => onSelect(item.id)} className={`w-full rounded-xl border p-3 text-left transition hover:border-blue-300 ${item.id === currentCase.id ? "border-blue-300 bg-blue-50/60" : "border-slate-100"}`}><div className="flex items-center justify-between gap-3"><span className="truncate text-sm font-semibold">{item.title}</span><span className="shrink-0 text-xs text-slate-400">{formatDue(item.nextDeadline)}</span></div><p className="mt-1 text-xs text-slate-500">{item.caseType}</p></button>)}<p className="pt-2 text-xs leading-5 text-slate-400">Demo mode uses synthetic evidence. No legal conclusion is issued and no external message is sent without approval.</p></CardContent></Card><DraftOutput bundle={bundle} /><ApprovalsPreview pending={pending} onResolve={onResolve} /></div></div>;
+}
+
+function TracePanel({ trace }: { trace: any[] }) { return <Card className="border-0 bg-white shadow-sm"><CardHeader className="flex-row items-center justify-between"><CardTitle className="text-base">Agent trace</CardTitle><span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-600"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />live</span></CardHeader><CardContent className="max-h-[390px] space-y-4 overflow-auto">{trace.length === 0 ? <p className="text-sm text-slate-400">Run the agent to start the trace.</p> : trace.map((event: any) => <div key={event.id} className="relative flex gap-3"><div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${event.status === "warning" ? "bg-amber-400" : event.status === "waiting" ? "bg-violet-400" : "bg-emerald-500"}`} /><div><div className="flex flex-wrap items-center gap-2"><span className="text-xs font-bold text-slate-900">{event.agent}</span><StatusPill status={event.status} /></div><p className="mt-1 text-xs leading-5 text-slate-500">{event.message}</p></div></div>)}</CardContent></Card>; }
+function Metric({ icon, label, value, note }: any) { return <div className="rounded-2xl bg-slate-50 p-4"><div className="flex items-center gap-2 text-slate-500">{icon && <span className="text-blue-600">{icon}</span>}<span className="text-xs font-semibold">{label}</span></div><p className="mt-3 text-2xl font-semibold">{value}</p><p className="text-xs text-slate-400">{note}</p></div>; }
+function DraftOutput({ bundle }: any) { const checklist = bundle?.case?.checklistJson ? JSON.parse(bundle.case.checklistJson) : []; return <Card className="border-0 bg-white shadow-sm"><CardHeader className="flex-row items-center justify-between"><CardTitle className="text-base">Evidence-grounded draft</CardTitle><FileText className="h-4 w-4 text-blue-600" /></CardHeader><CardContent><div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-700"><p className="whitespace-pre-line">{bundle?.case?.draftLetter || "Run the agent to generate a cited response letter."}</p><p className="mt-3 text-xs font-semibold text-blue-700">Citations are preserved on the case artifact · Draft held for approval</p></div>{checklist.length > 0 && <div className="mt-4 space-y-2"><p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Required items</p>{checklist.map((item: string) => <div key={item} className="flex items-center gap-2 text-sm text-slate-600"><span className="h-1.5 w-1.5 rounded-full bg-blue-600" />{item}</div>)}</div>}</CardContent></Card>; }
+function ApprovalsPreview({ pending, onResolve }: any) { return <Card className="border-0 bg-white shadow-sm"><CardHeader className="flex-row items-center justify-between"><CardTitle className="text-base">Approval queue</CardTitle><Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">{pending.length} pending</Badge></CardHeader><CardContent className="space-y-3">{pending.slice(0, 2).map((row: any) => <ApprovalRow key={row.approval.id} row={row} onResolve={onResolve} />)}{pending.length === 0 && <p className="text-sm text-slate-400">No high-stakes actions are waiting.</p>}</CardContent></Card>; }
+function ApprovalRow({ row, onResolve }: any) { return <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-3"><div className="flex items-start gap-3"><Send className="mt-0.5 h-4 w-4 text-amber-700" /><div className="min-w-0 flex-1"><p className="text-sm font-semibold text-amber-950">{row.action.title}</p><p className="mt-1 text-xs leading-5 text-amber-900/70">{row.approval.rationale}</p><div className="mt-3 flex gap-2"><Button size="sm" className="h-7 bg-amber-900 text-xs hover:bg-amber-800" onClick={() => onResolve(row.approval.id, "approved")}><Check className="mr-1 h-3 w-3" />Approve</Button><Button size="sm" variant="outline" className="h-7 border-amber-200 bg-transparent text-xs text-amber-900" onClick={() => onResolve(row.approval.id, "rejected")}><X className="mr-1 h-3 w-3" />Reject</Button></div></div></div></div>; }
+function ApprovalsPage({ pending, onResolve }: any) { return <div className="max-w-3xl"><Card className="border-0 bg-white shadow-sm"><CardHeader><CardTitle>Pending actions</CardTitle></CardHeader><CardContent className="space-y-4">{pending.map((row: any) => <ApprovalRow key={row.approval.id} row={row} onResolve={onResolve} />)}{pending.length === 0 && <p className="text-sm text-slate-500">The queue is clear.</p>}</CardContent></Card></div>; }
+function EvidencePage({ bundle }: any) {
+  const upload = trpc.civic.uploadEvidence.useMutation({ onSuccess: () => toast.success("Evidence stored and attached to the case"), onError: error => toast.error(error.message) });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const caseId = bundle?.case?.id;
+  const handleFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !caseId) { toast.error("Load the demo case first"); return; }
+    const buffer = await file.arrayBuffer();
+    const contentBase64 = btoa(String.fromCharCode(...Array.from(new Uint8Array(buffer))));
+    upload.mutate({ caseId, fileName: file.name, mimeType: file.type || "application/octet-stream", contentBase64 });
+  };
+  return <div className="max-w-4xl space-y-6"><Card className="border-0 bg-white shadow-sm"><CardContent className="flex flex-col items-center justify-center p-10 text-center"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600"><Upload /></div><h2 className="mt-5 text-xl font-semibold">Drop the messy notice here.</h2><p className="mt-2 max-w-md text-sm leading-6 text-slate-500">PDF, image, or text evidence becomes a cited case artifact. The demo case below is already stored in S3-compatible evidence storage.</p><input ref={inputRef} type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,application/pdf,image/*,text/plain" className="hidden" onChange={handleFile} /><Button className="mt-5 bg-slate-950" onClick={() => inputRef.current?.click()} disabled={upload.isPending}><Upload className="mr-2 h-4 w-4" />{upload.isPending ? "Storing…" : "Upload evidence"}</Button></CardContent></Card><Card className="border-0 bg-white shadow-sm"><CardHeader><CardTitle>Stored case evidence</CardTitle></CardHeader><CardContent className="space-y-3">{(bundle?.evidence ?? []).map((item: any) => <div key={item.id} className="flex items-center gap-3 rounded-xl border border-slate-100 p-4"><FileCheck2 className="h-5 w-5 text-emerald-600" /><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{item.fileName}</p><p className="mt-1 text-xs text-slate-500">{item.mimeType} · citation-ready retrieval link persisted</p></div><a className="text-xs font-semibold text-blue-600 hover:underline" href={item.storageUrl} target="_blank" rel="noreferrer">Open source</a></div>)}{!bundle?.evidence?.length && <p className="text-sm text-slate-500">Load the demo case from the command center to see evidence.</p>}</CardContent></Card></div>;
+}
+function EmptyState({ onSeed }: { onSeed: () => void }) { return <Card className="border-0 bg-white shadow-sm"><CardContent className="p-10 text-center"><GitBranch className="mx-auto h-10 w-10 text-blue-600" /><h2 className="mt-4 text-xl font-semibold">No cases yet</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Load the synthetic Northstar repair case to see the full autonomous workflow.</p><Button onClick={onSeed} className="mt-5 bg-slate-950">Load demo case</Button></CardContent></Card>; }

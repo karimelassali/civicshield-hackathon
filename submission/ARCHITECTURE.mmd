@@ -1,0 +1,30 @@
+flowchart LR
+  U[Resident / Case Officer] --> UI[CivicShield Web UI]
+  UI --> API[Cloud Run API]
+  UI --> TRACE[Live Trace + Approval Queue]
+  API --> INGEST[Evidence Intake]
+  INGEST --> S3[S3-compatible Evidence Storage]
+  API --> GEMINI[Gemini 3.5 / Vertex AI]
+  GEMINI --> ADK[ADK / Genkit Agent Orchestration]
+  ADK --> PLAN[Conflict Detector + Dependency Graph]
+  PLAN --> ACTIONS[Prioritized Actions]
+  ACTIONS --> GATE{Human Approval Gate}
+  GATE -->|approved| OUT[Scoped Outbound Tool]
+  GATE -->|rejected| HOLD[Blocked + Audited]
+  API --> FS[Firestore Case Memory]
+  API --> PUB[Pub/Sub Async Events]
+  PUB --> API
+  API --> AUDIT[Audit Trace + Evidence Citations]
+  AUDIT --> FS
+  S3 --> GEMINI
+  FS --> UI
+  TRACE --> FS
+
+  classDef core fill:#eef2ff,stroke:#4f46e5,color:#1e1b4b;
+  classDef cloud fill:#ecfdf5,stroke:#059669,color:#064e3b;
+  classDef safety fill:#fff7ed,stroke:#ea580c,color:#7c2d12;
+  classDef memory fill:#ecfeff,stroke:#0891b2,color:#164e63;
+  class UI,API,GEMINI,ADK,PLAN,ACTIONS core;
+  class S3,PUB,OUT cloud;
+  class GATE,HOLD,TRACE,AUDIT safety;
+  class FS memory;
