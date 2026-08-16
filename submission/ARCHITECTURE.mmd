@@ -1,20 +1,20 @@
 flowchart LR
   U[Resident / Case Officer] --> UI[CivicShield Web UI]
-  UI --> API[Cloud Run API]
+  UI --> API[Optional Cloud Run API adapter]
   UI --> TRACE[Live Trace + Approval Queue]
   API --> INGEST[Evidence Intake]
   INGEST --> S3[S3-compatible Evidence Storage]
-  API --> GEMINI[Gemini 3.5 / Vertex AI]
-  GEMINI --> ADK[ADK / Genkit Agent Orchestration]
+  API --> GEMINI[Optional Gemini 3.5 / Vertex AI adapter]
+  GEMINI --> ADK[Optional ADK / Genkit orchestration]
   ADK --> PLAN[Conflict Detector + Dependency Graph]
   PLAN --> ACTIONS[Prioritized Actions]
   ACTIONS --> GATE{Human Approval Gate}
   GATE -->|approved| OUT[Scoped Outbound Tool]
   GATE -->|rejected| HOLD[Blocked + Audited]
-  API --> FS[Firestore Case Memory]
-  API --> PUB[Pub/Sub Async Events]
+  API --> FS[Optional Firestore adapter]
+  API --> PUB[Optional Pub/Sub async events]
   PUB --> API
-  API --> AUDIT[Audit Trace + Evidence Citations]
+  API --> AUDIT[Built-in durable audit trace + evidence citations]
   AUDIT --> FS
   S3 --> GEMINI
   FS --> UI

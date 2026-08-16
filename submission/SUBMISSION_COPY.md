@@ -20,7 +20,7 @@ CivicShield is built around **deadline rescue under uncertainty**. It does not s
 
 ## Technology
 
-The prototype uses Gemini through the server-side LLM integration, a Google agent-framework-compatible orchestration model represented as ADK / Genkit in the architecture, S3-compatible evidence storage, a relational case-memory schema aligned to Firestore concepts, and asynchronous event concepts aligned to Pub/Sub. The production submission should show the verified Gemini 3.5 or newer model and Google Cloud deployment proof in the video.
+The prototype uses the built-in server-side LLM integration, S3-compatible evidence storage, durable case memory, and persisted asynchronous-style trace events. The architecture page also documents an optional production adapter for Gemini 3.5 / Vertex AI, ADK / Genkit, Cloud Run, Firestore, and Pub/Sub; the free demo does not require Google Cloud billing, private credentials, or a paid account.
 
 ## Demo scenario
 
@@ -45,4 +45,4 @@ Use [`REPOSITORY_HANDOFF.md`](./REPOSITORY_HANDOFF.md) for the GitHub README str
 
 ## Final submission checklist
 
-Before submitting, replace the prototype’s current model/deployment note with the verified Gemini 3.5+ model identifier, attach Cloud Run / Vertex AI proof to the video, provide the public GitHub repository, publish the final four-minute video, and include the architecture diagram asset.
+Before submitting, provide the public GitHub repository, publish the final four-minute video, and include the architecture diagram asset. If Google Cloud access later becomes available, the optional Gemini 3.5 / Vertex AI adapter and Cloud Run proof can be added without changing the core safety workflow.

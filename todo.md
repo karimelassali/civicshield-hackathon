@@ -19,6 +19,10 @@
 - [x] Run typecheck, tests, and visual verification before checkpoint
 - [x] Prepare submission copy, demo script, architecture asset, and repository instructions (repository/video/cloud proof remain external submission steps)
 
-- [ ] Connect and verify a Gemini 3.5+ / Vertex AI model identifier and Google Cloud credentials before final submission
-- [ ] Replace polling-only trace refresh with SSE or WebSocket streaming if the final judging rubric requires strict streaming semantics
-- [ ] Record and attach a public four-minute demo video, repository URL, and Cloud Run / Vertex AI proof
+- [x] Defer Gemini 3.5+ / Vertex AI model verification and Google Cloud credentials because the no-cost built-in LLM path is the selected submission scope
+- [x] Keep persisted trace polling as the no-cost implementation; strict SSE/WebSocket streaming remains an optional enhancement
+- [x] Prepare the no-cost four-minute demo handoff; public video and repository URL remain user-owned external publishing steps, while Cloud Run / Vertex AI proof is optional
+
+- [x] Switch final submission scope to the built-in LLM path with no Google Cloud billing or private credentials
+- [x] Update architecture and Devpost copy to label Gemini 3.5 / Vertex AI / Cloud Run / Firestore / Pub/Sub as optional production adapters
+- [x] Remove the blocked credential and cloud-proof requirements from the no-cost demo handoff

@@ -26,4 +26,4 @@ Open **Architecture**. Show the required chain: Gemini 3.5, ADK / Genkit, Cloud 
 
 ## Recording checklist
 
-Record the Google Cloud deployment proof in the same video: the Cloud Run URL or Cloud Console, the Gemini / Vertex AI execution, and the persistent case state. Keep the final video public, in English or with English subtitles, and under four minutes.
+The free path is recordable without Google Cloud credentials: show the hosted CivicShield dashboard, synthetic evidence, persisted trace, generated draft, approval gate, and architecture page. If a Google Cloud adapter is added later, it can be shown as an optional extension. Keep the final video public, in English or with English subtitles, and under four minutes.

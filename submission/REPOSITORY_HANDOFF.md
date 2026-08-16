@@ -23,8 +23,8 @@ Run `pnpm install`, configure the managed project environment, then run `pnpm de
 
 ## Deployment notes
 
-The project is designed for managed Cloud Run-style deployment. Do not commit `.env` files, service-account keys, user documents, or private credentials. Before the final video, verify the Gemini 3.5+ / Vertex AI model identifier and provide the Cloud Run and Google Cloud proof requested by the hackathon. The architecture page intentionally names ADK / Genkit, Cloud Run, Firestore, and Pub/Sub so the production mapping is explicit.
+The project is designed for managed Cloud Run-style deployment. Do not commit `.env` files, service-account keys, user documents, or private credentials. The no-cost demo does not require Google Cloud credentials, billing, Gemini 3.5+/Vertex AI verification, or Cloud Run proof. If those optional adapters are added later, document them separately without changing the free-path setup. The architecture page intentionally names ADK / Genkit, Cloud Run, Firestore, and Pub/Sub so the production mapping is explicit.
 
 ## Devpost handoff
 
-Paste the final public repository URL into the Devpost submission, attach the public demo video, upload `ARCHITECTURE.png`, and use the copy in `SUBMISSION_COPY.md`. Confirm that the video shows the live trace, evidence citations, approval gate, and the Google Cloud deployment proof. Do not claim that a message was sent or a form was submitted unless the action was actually approved and executed in the connected environment.
+Paste the final public repository URL into the Devpost submission, attach the public demo video, upload `ARCHITECTURE.png`, and use the copy in `SUBMISSION_COPY.md`. Confirm that the video shows the live trace, evidence citations, approval gate, persisted draft, and architecture page. Google Cloud deployment proof is optional and should not be described as part of the no-cost path. Do not claim that a message was sent or a form was submitted unless the action was actually approved and executed in the connected environment.
