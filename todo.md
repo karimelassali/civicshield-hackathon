@@ -37,3 +37,8 @@
 - [x] Lock the final free-path rehearsal language across README, UI, demo script, Devpost copy, and repository handoff without implying hackathon compliance
 - [x] Add a rehearsal-mode proof banner or disclosure so judges are not misled about the missing Google-stack integration
 - [x] Add a compact judge handoff card with the demo sequence, measurable outcomes, and safe-action boundary
+
+- [ ] Prepare an honest Devpost submission draft that labels the build as a rehearsal and does not claim Google-stack compliance
+- [ ] Open the Devpost submission form and complete only fields supported by the available project materials
+- [ ] Stop at the final Devpost submission control for explicit confirmation
+- [ ] Record the final submission status and demo handoff instructions
